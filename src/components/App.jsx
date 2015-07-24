@@ -23,7 +23,8 @@ export default class App extends React.Component {
         tracks: [],
         videos: [],
         artistName: '',
-        activeIndex: null
+        activeIndex: null,
+        playing: false,
     }
     static childContextTypes = {
         muiTheme: React.PropTypes.object
@@ -81,6 +82,7 @@ export default class App extends React.Component {
                 this.setState({
                     videos: videos,
                     activeIndex: index,
+                    playing: true,
                 });
             });
     }
@@ -92,22 +94,23 @@ export default class App extends React.Component {
         }
     }
     pausePlayToggle() {
-        if (this.props.player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+        if (this.state.playing === true) {
             this.props.player.pauseVideo();
         } else {
             this.props.player.playVideo();
         }
+        this.setState({
+            playing: !this.state.playing,
+        });
     }
     playerStateChange(event) {
-        console.log(event.data);
         if (event.data === window.YT.PlayerState.ENDED) {
-            if (this.state.activeIndex === this.tracks.length) {
-                this.setState({
-                    activeIndex: null,
-                });
+            let nextIndex = null;
+            if (this.state.activeIndex < this.state.tracks.length - 1) {
+                nextIndex = this.state.activeIndex + 1;
             }
             this.setState({
-                activeIndex: this.state.activeIndex + 1,
+                activeIndex: nextIndex,
             });
         }
     }
@@ -120,7 +123,7 @@ export default class App extends React.Component {
                         <Controls
                             disabled={this.state.activeIndex === null}
                             onClickHandler={this.pausePlayToggle}
-                            player={this.props.player}
+                            playing={this.state.playing}
                         />
                     }
                 />

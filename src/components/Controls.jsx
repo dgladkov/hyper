@@ -7,14 +7,7 @@ export default class Controls extends React.Component {
     static propTypes = {
         disabled: React.PropTypes.bool,
         onClickHandler: React.PropTypes.func,
-        player: React.PropTypes.object,
-    }
-    constructor() {
-        super();
-        this.isPlaying = this.isPlaying.bind(this);
-    }
-    isPlaying() {
-        return true //this.props.player.getPlayerState() === window.YT.PlayerState.PLAYING;
+        playing: React.PropTypes.bool,
     }
     render() {
         return (
@@ -24,7 +17,7 @@ export default class Controls extends React.Component {
                     iconClassName="material-icons"
                     disabled={this.props.disabled}
                 >
-                    {this.isPlaying() ? 'pause' : 'play_arrow'}
+                    {this.props.playing === true ? 'pause' : 'play_arrow'}
                 </IconButton>
             </div>
         );
