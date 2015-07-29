@@ -1,4 +1,5 @@
 import React from 'react';
+import reactMixin from 'react-mixin';
 import {
     List,
     ListItem,
@@ -11,6 +12,7 @@ const STYLES = {
     }
 };
 
+@reactMixin.decorate(React.addons.PureRenderMixin)
 export default class Playlist extends React.Component {
     static propTypes = {
         tracks: React.PropTypes.array,
