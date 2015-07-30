@@ -170,10 +170,11 @@ export default class App extends React.Component {
                     }
                     iconElementLeft={
                         <Controls
-                            onClickHandler={this.pausePlayToggle}
+                            onPlayPauseHandler={this.pausePlayToggle}
                             playing={this.state.playing}
                             tracks={this.state.tracks}
                             activeIndex={this.state.activeIndex}
+                            handleVideoSelect={this.handleVideoSelect}
                         />
                     }
                     iconElementRight={
