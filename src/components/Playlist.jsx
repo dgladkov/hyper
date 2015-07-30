@@ -1,9 +1,6 @@
 import React from 'react';
 import reactMixin from 'react-mixin';
-import {
-    List,
-    ListItem,
-} from 'material-ui';
+import { List, ListItem } from 'material-ui';
 
 const STYLES = {
     activeItem: {
@@ -20,7 +17,9 @@ export default class Playlist extends React.Component {
         handleVideoSelect: React.PropTypes.func,
     }
     handleItemClick(index) {
-        this.props.handleVideoSelect(index);
+        if (!this.props.loading) {
+            this.props.handleVideoSelect(index);
+        }
     }
     render() {
         return (

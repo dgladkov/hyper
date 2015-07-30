@@ -1,8 +1,6 @@
 import React from 'react';
 import reactMixin from 'react-mixin';
-import {
-    IconButton
-} from 'material-ui';
+import { IconButton } from 'material-ui';
 
 @reactMixin.decorate(React.addons.PureRenderMixin)
 export default class Controls extends React.Component {
@@ -17,21 +15,21 @@ export default class Controls extends React.Component {
                 <IconButton
                     onClick={this.props.onClickHandler}
                     iconClassName="material-icons"
-                    disabled={this.props.disabled}
+                    disabled={this.props.activeIndex === null || this.props.activeIndex === 0}
                 >
                     fast_rewind
                 </IconButton>
                 <IconButton
                     onClick={this.props.onClickHandler}
                     iconClassName="material-icons"
-                    disabled={this.props.disabled}
+                    disabled={this.props.activeIndex === null}
                 >
                     {this.props.playing === true ? 'pause' : 'play_arrow'}
                 </IconButton>
                 <IconButton
                     onClick={this.props.onClickHandler}
                     iconClassName="material-icons"
-                    disabled={this.props.disabled}
+                    disabled={this.props.activeIndex === null || this.props.activeIndex === this.props.tracks.length - 1}
                 >
                     fast_forward
                 </IconButton>

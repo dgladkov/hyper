@@ -8,10 +8,12 @@ export default class Time extends React.Component {
         let currentPercent = this.props.currentTime / this.props.duration;
         return (
             <Slider
-                step="0.01"
+                step={0.01}
                 value={currentPercent}
                 name="progress"
+                disabled={!this.props.playing}
                 style={{marginTop: 20, marginBottom: 0}}
+                onChange={this.props.onChange}
             />
         );
     }

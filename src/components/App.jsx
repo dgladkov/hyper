@@ -8,13 +8,14 @@ import {
 } from 'material-ui';
 import Controls from './Controls';
 import Playlist from './Playlist';
+import ProgressIndicator from './ProgressIndicator';
 import Time from './Time';
 import TimeSlider from './TimeSlider';
 
 let ThemeManager = new Styles.ThemeManager();
 
-const LASTFM_API_KEY = '70bc1c39ae330d9cd698b7cc221febb6';
-const LASTFM_API_BASE = 'http://ws.audioscrobbler.com/2.0/';
+const LASTFM_API_KEY = '70bc1c39ae330d9cd698b7cc221febb6'; // YOLO
+const LASTFM_API_BASEURL = 'http://ws.audioscrobbler.com/2.0/';
 
 function yqlQuery(url) {
     let query = `select data-youtube-player-id from html where url="${url}" and compat="html5" and xpath='//div[@data-youtube-player-id]'`;
@@ -31,6 +32,7 @@ export default class App extends React.Component {
         playing: false,
         currentTime: 0,
         duration: 0,
+        loading: false,
     }
     static childContextTypes = {
         muiTheme: React.PropTypes.object
@@ -43,6 +45,7 @@ export default class App extends React.Component {
         this.handleVideoSelect = this.handleVideoSelect.bind(this);
         this.pausePlayToggle = this.pausePlayToggle.bind(this);
         this.playerStateChange = this.playerStateChange.bind(this);
+        this.handleTimeSeek = this.handleTimeSeek.bind(this);
     }
     componentDidMount() {
         this.props.player.addEventListener('onStateChange', this.playerStateChange);
@@ -54,8 +57,8 @@ export default class App extends React.Component {
     }
     updateCurrentTime() {
         this.setState({
-            currentTime: Math.floor(this.props.player.getCurrentTime()),
-            duration: this.props.player.getDuration()
+            currentTime: Math.floor(this.props.player.getCurrentTime()) || 0,
+            duration: this.props.player.getDuration() || 0
         });
     }
     getChildContext() {
@@ -64,7 +67,7 @@ export default class App extends React.Component {
         };
     }
     handleArtistSearch() {
-        fetch(`${LASTFM_API_BASE}?method=artist.gettoptracks&artist=${this.state.artistName}&api_key=${LASTFM_API_KEY}&format=json`)
+        fetch(`${LASTFM_API_BASEURL}?method=artist.gettoptracks&artist=${this.state.artistName}&api_key=${LASTFM_API_KEY}&format=json`)
             .then((response) => response.json())
             .then((data) => {
                 this.setState({
@@ -91,6 +94,9 @@ export default class App extends React.Component {
             });
             return;
         }
+        this.setState({
+            loading: true
+        });
         fetch(yqlQuery(this.state.tracks[index].url))
             .then((response) => response.json())
             .then((data) => {
@@ -100,6 +106,13 @@ export default class App extends React.Component {
                     videos: videos,
                     activeIndex: index,
                     playing: true,
+                    loading: false,
+                });
+            })
+            .catch((ex) => {
+                console.error(ex);
+                this.setState({
+                    loading: false,
                 });
             });
     }
@@ -129,9 +142,17 @@ export default class App extends React.Component {
             this.handleVideoSelect(nextIndex);
         }
     }
+    handleTimeSeek(event, value) {
+        let seekToTime = Math.floor(this.state.duration * value);
+        this.props.player.seekTo(seekToTime);
+        this.setState({
+            currentTime: seekToTime
+        });
+    }
     render() {
         return (
             <div>
+                <ProgressIndicator show={this.state.loading} />
                 <AppBar
                     style={{
                         position: 'fixed',
@@ -143,13 +164,16 @@ export default class App extends React.Component {
                         <TimeSlider
                             currentTime={this.state.currentTime}
                             duration={this.state.duration}
+                            playing={this.state.playing}
+                            onChange={this.handleTimeSeek}
                         />
                     }
                     iconElementLeft={
                         <Controls
-                            disabled={this.state.activeIndex === null}
                             onClickHandler={this.pausePlayToggle}
                             playing={this.state.playing}
+                            tracks={this.state.tracks}
+                            activeIndex={this.state.activeIndex}
                         />
                     }
                     iconElementRight={
@@ -175,6 +199,7 @@ export default class App extends React.Component {
                         handleVideoSelect={this.handleVideoSelect}
                         activeIndex={this.state.activeIndex}
                         tracks={this.state.tracks}
+                        loading={this.state.loading}
                     />
                 </div>
             </div>
