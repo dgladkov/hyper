@@ -58,7 +58,7 @@ export default class App extends React.Component {
     updateCurrentTime() {
         this.setState({
             currentTime: Math.floor(this.props.player.getCurrentTime()) || 0,
-            duration: this.props.player.getDuration() || 0
+            duration: Math.floor(this.props.player.getDuration()) || 0
         });
     }
     getChildContext() {
