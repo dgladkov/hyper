@@ -21,7 +21,7 @@ export default class Controls extends React.Component {
                     fast_rewind
                 </IconButton>
                 <IconButton
-                    onClick={this.props.onClickHandler}
+                    onClick={this.props.onPlayPauseHandler}
                     iconClassName="material-icons"
                     disabled={this.props.activeIndex === null}
                 >
