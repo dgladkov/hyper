@@ -33,6 +33,8 @@ export default class App extends React.Component {
         currentTime: 0,
         duration: 0,
         loading: false,
+        dragging: false,
+        draggingValue: null,
     }
     static childContextTypes = {
         muiTheme: React.PropTypes.object
@@ -46,11 +48,14 @@ export default class App extends React.Component {
         this.pausePlayToggle = this.pausePlayToggle.bind(this);
         this.playerStateChange = this.playerStateChange.bind(this);
         this.handleTimeSeek = this.handleTimeSeek.bind(this);
+        this.handleTimeDragStart = this.handleTimeDragStart.bind(this);
+        this.handleTimeDragStop = this.handleTimeDragStop.bind(this);
+        this.seekTo = this.seekTo.bind(this);
     }
     componentDidMount() {
         this.props.player.addEventListener('onStateChange', this.playerStateChange);
         setInterval(() => {
-            if (this.state.playing) {
+            if (this.state.playing && !this.state.dragging) {
                 this.updateCurrentTime();
             }
         }, 200);
@@ -67,6 +72,9 @@ export default class App extends React.Component {
         };
     }
     handleArtistSearch() {
+        this.setState({
+            loading: true
+        });
         fetch(`${LASTFM_API_BASEURL}?method=artist.gettoptracks&artist=${this.state.artistName}&api_key=${LASTFM_API_KEY}&format=json`)
             .then((response) => response.json())
             .then((data) => {
@@ -74,6 +82,13 @@ export default class App extends React.Component {
                     tracks: data.toptracks.track,
                     videos: [],
                     activeIndex: null,
+                    loading: false,
+                });
+            })
+            .catch((ex) => {
+                console.error(ex);
+                this.setState({
+                    loading: false,
                 });
             });
     }
@@ -107,6 +122,8 @@ export default class App extends React.Component {
                     activeIndex: index,
                     playing: true,
                     loading: false,
+                    currentTime: 0,
+                    duration: 0,
                 });
             })
             .catch((ex) => {
@@ -142,12 +159,32 @@ export default class App extends React.Component {
             this.handleVideoSelect(nextIndex);
         }
     }
-    handleTimeSeek(event, value) {
+    seekTo(value) {
         let seekToTime = Math.floor(this.state.duration * value);
         this.props.player.seekTo(seekToTime);
         this.setState({
             currentTime: seekToTime
         });
+    }
+    handleTimeSeek(event, value) {
+        if (this.state.dragging) {
+            this.setState({
+                draggingValue: value,
+            });
+        } else {
+            this.seekTo(value);
+        }
+    }
+    handleTimeDragStart() {
+        this.setState({
+            dragging: true
+        });
+    }
+    handleTimeDragStop() {
+        this.setState({
+            dragging: false
+        });
+        this.seekTo(this.state.draggingValue);
     }
     render() {
         return (
@@ -166,6 +203,8 @@ export default class App extends React.Component {
                             duration={this.state.duration}
                             playing={this.state.playing}
                             onChange={this.handleTimeSeek}
+                            onDragStart={this.handleTimeDragStart}
+                            onDragStop={this.handleTimeDragStop}
                         />
                     }
                     iconElementLeft={

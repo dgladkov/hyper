@@ -2,6 +2,13 @@ import React from 'react';
 import reactMixin from 'react-mixin';
 import { Slider } from 'material-ui';
 
+const STYLES = {
+    main: {
+        marginTop: 20,
+        marginBottom: 0
+    }
+};
+
 @reactMixin.decorate(React.addons.PureRenderMixin)
 export default class Time extends React.Component {
     render() {
@@ -12,8 +19,10 @@ export default class Time extends React.Component {
                 value={currentPercent}
                 name="progress"
                 disabled={!this.props.playing}
-                style={{marginTop: 20, marginBottom: 0}}
+                style={STYLES.main}
                 onChange={this.props.onChange}
+                onDragStart={this.props.onDragStart}
+                onDragStop={this.props.onDragStop}
             />
         );
     }
