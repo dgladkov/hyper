@@ -18,7 +18,7 @@ const LASTFM_API_KEY = '70bc1c39ae330d9cd698b7cc221febb6'; // YOLO
 const LASTFM_API_BASEURL = 'http://ws.audioscrobbler.com/2.0/';
 
 function yqlQuery(url) {
-    let query = `select data-youtube-player-id from html where url="${url}" and compat="html5" and xpath='//div[@data-youtube-player-id]'`;
+    let query = `select data-youtube-id from html where url="${url}" and compat="html5" and xpath='//a[@data-youtube-id]' limit 1`;
     return `https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(query)}&format=json&diagnostics=false`;
 }
 
@@ -116,7 +116,7 @@ export default class App extends React.Component {
             .then((response) => response.json())
             .then((data) => {
                 let videos = this.state.videos.slice();
-                videos[index] = data.query.results.div['data-youtube-player-id'];
+                videos[index] = data.query.results.a['data-youtube-id'];
                 this.setState({
                     videos: videos,
                     activeIndex: index,
