@@ -19,7 +19,7 @@ export default class Sliders extends PureComponent {
 
   static propTypes = {
     currentTime: PropTypes.number.isRequired,
-    currentVolume: PropTypes.number.isRequired,
+    volume: PropTypes.number.isRequired,
     duration: PropTypes.number.isRequired,
     playing: PropTypes.bool.isRequired,
     onTimeChange: PropTypes.func.isRequired,
@@ -35,7 +35,7 @@ export default class Sliders extends PureComponent {
           step={1}
           min={0}
           max={100}
-          value={this.props.currentVolume}
+          value={this.props.volume}
           name="volume"
           disabled={!this.props.playing}
           style={STYLES.volumeSlider}

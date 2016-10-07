@@ -31,7 +31,7 @@ export default class Playlist extends PureComponent {
             <ListItem
               key={index}
               onClick={this.handleItemClick.bind(this, index)}
-              primaryText={track.name}
+              primaryText={`${track.artist.name} - ${track.name}`}
               style={index === this.props.activeIndex ? STYLES.activeItem : null}
             />
           ))}

@@ -6,6 +6,8 @@ import TextField from 'material-ui/TextField';
 import Paper from 'material-ui/Paper';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 
 import Controls from './components/Controls';
 import Playlist from './components/Playlist';
@@ -13,8 +15,7 @@ import ProgressIndicator from './components/ProgressIndicator';
 import Time from './components/Time';
 import Sliders from './components/Sliders';
 
-const LASTFM_API_KEY = '70bc1c39ae330d9cd698b7cc221febb6'; // YOLO
-const LASTFM_API_BASEURL = 'http://ws.audioscrobbler.com/2.0/';
+import lastfm from './api/lastfm';
 
 const muiTheme = getMuiTheme({
   slider: {
@@ -29,13 +30,18 @@ function yqlQuery(url) {
   return `https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(query)}&format=json&diagnostics=false`;
 }
 
+const searchTypeToApiCall = {
+  artist: lastfm.getTopTracksByArtist,
+  tag: lastfm.getTopTracksByTag,
+};
+
 export default class App extends PureComponent {
 
   constructor(props) {
     super(props);
     this.handleTextInput = this.handleTextInput.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.handleArtistSearch = this.handleArtistSearch.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
     this.handleVideoSelect = this.handleVideoSelect.bind(this);
     this.pausePlayToggle = this.pausePlayToggle.bind(this);
     this.playerStateChange = this.playerStateChange.bind(this);
@@ -44,12 +50,13 @@ export default class App extends PureComponent {
     this.handleTimeDragStop = this.handleTimeDragStop.bind(this);
     this.handleTimeSeek = this.handleTimeSeek.bind(this);
     this.handleVolumeChange = this.handleVolumeChange.bind(this);
+    this.changeSearchType = this.changeSearchType.bind(this);
   }
 
   state = {
     tracks: [],
     videos: [],
-    artistName: '',
+    searchQuery: '',
     activeIndex: null,
     playing: false,
     currentTime: 0,
@@ -57,7 +64,8 @@ export default class App extends PureComponent {
     loading: false,
     dragging: false,
     draggingValue: null,
-    currentVolume: 100,
+    volume: 100,
+    searchType: 'artist',
   }
 
   componentDidMount() {
@@ -91,15 +99,15 @@ export default class App extends PureComponent {
     });
   }
 
-  handleArtistSearch() {
+  handleSearch() {
     this.setState({
       loading: true,
     });
-    fetch(`${LASTFM_API_BASEURL}?method=artist.gettoptracks&artist=${this.state.artistName}&api_key=${LASTFM_API_KEY}&format=json`)
-      .then((response) => response.json())
-      .then((data) => {
+    const apiCall = searchTypeToApiCall[this.state.searchType];
+    apiCall(this.state.searchQuery)
+      .then((tracks) => {
         this.setState({
-          tracks: data.toptracks.track,
+          tracks: tracks,
           videos: [],
           activeIndex: null,
           loading: false,
@@ -114,12 +122,12 @@ export default class App extends PureComponent {
   }
   handleChange(e) {
     this.setState({
-      artistName: e.target.value,
+      searchQuery: e.target.value,
     });
   }
   handleTextInput(e) {
     if (e.keyCode === 13) {
-      this.handleArtistSearch();
+      this.handleSearch();
     }
   }
   handleVideoSelect(index) {
@@ -164,10 +172,11 @@ export default class App extends PureComponent {
       playing: !this.state.playing,
     });
   }
+
   playerStateChange(event) {
     if (event.data === -1) {
       this.setState({
-        currentVolume: this._player.getVolume(),
+        volume: this._player.getVolume(),
       });
     }
     if (event.data === window.YT.PlayerState.ENDED) {
@@ -178,16 +187,19 @@ export default class App extends PureComponent {
       this.handleVideoSelect(nextIndex);
     }
   }
+
   handleTimeSeek(event, value) {
     this.setState({
       draggingValue: value,
     });
   }
+
   handleTimeDragStart() {
     this.setState({
       dragging: true,
     });
   }
+
   handleTimeDragStop() {
     let seekToTime = Math.floor(this.state.duration * this.state.draggingValue);
     this._player.seekTo(seekToTime);
@@ -196,12 +208,20 @@ export default class App extends PureComponent {
       dragging: false,
     });
   }
+
   handleVolumeChange(event, value) {
     this.setState({
-      currentVolume: value,
+      volume: value,
     });
     this._player.setVolume(value);
   }
+
+  changeSearchType(event, key, value) {
+    this.setState({
+      searchType: value,
+    });
+  }
+
   render() {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
@@ -217,7 +237,7 @@ export default class App extends PureComponent {
             title={
               <Sliders
                 currentTime={this.state.currentTime}
-                currentVolume={this.state.currentVolume}
+                volume={this.state.volume}
                 duration={this.state.duration}
                 playing={this.state.playing}
                 onTimeChange={this.handleTimeSeek}
@@ -249,14 +269,18 @@ export default class App extends PureComponent {
             }}
           />
           <Paper style={{top: 80, marginBottom: 15, position: 'relative'}}>
-            <div style={{paddingLeft: 16, paddingTop: 10}}>
+            <div style={{paddingLeft: 16, paddingTop: 10, display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
               <TextField
-                hintText="Type artist name"
-                value={this.state.artistName}
+                hintText="Your search query"
+                value={this.state.searchQuery}
                 onChange={this.handleChange}
                 onKeyUp={this.handleTextInput}
               />
-              <FlatButton onClick={this.handleArtistSearch} label="Find" />
+              <SelectField value={this.state.searchType} onChange={this.changeSearchType}>
+                <MenuItem value="artist" primaryText="Artist" />
+                <MenuItem value="tag" primaryText="Tag" />
+              </SelectField>
+              <FlatButton onClick={this.handleSearch} label="Find" />
             </div>
             <Playlist
               handleVideoSelect={this.handleVideoSelect}
