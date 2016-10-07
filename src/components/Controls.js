@@ -4,9 +4,8 @@ import IconButton from 'material-ui/IconButton';
 export default class Controls extends PureComponent {
 
   static propTypes = {
-    activeIndex: PropTypes.number.isRequired,
+    activeIndex: PropTypes.number,
     lastIndex: PropTypes.number.isRequired,
-    disabled: PropTypes.bool.isRequired,
     handleVideoSelect: PropTypes.func.isRequired,
     onPlayPauseHandler: PropTypes.func.isRequired,
     playing: PropTypes.bool.isRequired,

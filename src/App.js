@@ -7,11 +7,11 @@ import Paper from 'material-ui/Paper';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
-import Controls from './Controls';
-import Playlist from './Playlist';
-import ProgressIndicator from './ProgressIndicator';
-import Time from './Time';
-import TimeSlider from './TimeSlider';
+import Controls from './components/Controls';
+import Playlist from './components/Playlist';
+import ProgressIndicator from './components/ProgressIndicator';
+import Time from './components/Time';
+import TimeSlider from './components/TimeSlider';
 
 const LASTFM_API_KEY = '70bc1c39ae330d9cd698b7cc221febb6'; // YOLO
 const LASTFM_API_BASEURL = 'http://ws.audioscrobbler.com/2.0/';
@@ -30,10 +30,6 @@ function yqlQuery(url) {
 }
 
 export default class App extends PureComponent {
-
-  static propTypes = {
-    player: PropTypes.object.isRequired,
-  }
 
   constructor(props) {
     super(props);
@@ -64,26 +60,33 @@ export default class App extends PureComponent {
   }
 
   componentDidMount() {
-    this.props.player.addEventListener('onStateChange', this.playerStateChange);
     setInterval(() => {
       if (this.state.playing && !this.state.dragging) {
         this.updateCurrentTime();
       }
     }, 200);
+    window.onYouTubeIframeAPIReady = () => {
+      this._player = new window.YT.Player('hidden');
+      this._player.addEventListener('onStateChange', this.playerStateChange);
+    };
   }
 
   componentDidUpdate(prevProps, prevState) {
     // load video every time active index changes
     if (this.state.activeIndex !== null && prevState.activeIndex !== this.state.activeIndex) {
       let activeVideo = this.state.videos[this.state.activeIndex];
-      this.props.player.loadVideoById(activeVideo);
+      this._player.loadVideoById(activeVideo);
     }
+  }
+
+  componentDidUnmount() {
+    this._player.destroy();
   }
 
   updateCurrentTime() {
     this.setState({
-      currentTime: Math.floor(this.props.player.getCurrentTime()) || 0,
-      duration: Math.floor(this.props.player.getDuration()) || 0,
+      currentTime: Math.floor(this._player.getCurrentTime()) || 0,
+      duration: Math.floor(this._player.getDuration()) || 0,
     });
   }
   handleArtistSearch() {
@@ -151,9 +154,9 @@ export default class App extends PureComponent {
 
   pausePlayToggle() {
     if (this.state.playing === true) {
-      this.props.player.pauseVideo();
+      this._player.pauseVideo();
     } else {
-      this.props.player.playVideo();
+      this._player.playVideo();
     }
     this.setState({
       playing: !this.state.playing,
@@ -170,7 +173,7 @@ export default class App extends PureComponent {
   }
   seekTo(value) {
     let seekToTime = Math.floor(this.state.duration * value);
-    this.props.player.seekTo(seekToTime);
+    this._player.seekTo(seekToTime);
     this.setState({
       currentTime: seekToTime,
     });

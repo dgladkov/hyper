@@ -17,9 +17,7 @@ export default class Time extends PureComponent {
   render() {
     return (
       <div>
-        {secondsToTimestamp(this.props.currentTime)}
-        /
-        {secondsToTimestamp(this.props.duration)}
+        {secondsToTimestamp(this.props.currentTime)} / {secondsToTimestamp(this.props.duration)}
       </div>
     );
   }

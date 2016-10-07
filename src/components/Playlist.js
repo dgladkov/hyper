@@ -12,7 +12,7 @@ export default class Playlist extends PureComponent {
 
   static propTypes = {
     tracks: PropTypes.array.isRequired,
-    activeIndex: PropTypes.number.isRequired,
+    activeIndex: PropTypes.number,
     handleVideoSelect: PropTypes.func.isRequired,
     loading: PropTypes.bool.isRequired,
   }
