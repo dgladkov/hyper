@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PropTypes, PureComponent } from 'react';
 import { List, ListItem } from 'material-ui/List';
 
 const STYLES = {
@@ -9,16 +9,20 @@ const STYLES = {
 };
 
 export default class Playlist extends PureComponent {
+
   static propTypes = {
-    tracks: React.PropTypes.array,
-    activeIndex: React.PropTypes.number,
-    handleVideoSelect: React.PropTypes.func,
+    tracks: PropTypes.array.isRequired,
+    activeIndex: PropTypes.number.isRequired,
+    handleVideoSelect: PropTypes.func.isRequired,
+    loading: PropTypes.bool.isRequired,
   }
+
   handleItemClick(index) {
     if (!this.props.loading) {
       this.props.handleVideoSelect(index);
     }
   }
+
   render() {
     return (
       <div>
@@ -35,4 +39,5 @@ export default class Playlist extends PureComponent {
       </div>
     );
   }
+
 }

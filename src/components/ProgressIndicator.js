@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PropTypes, PureComponent } from 'react';
 import CircularProgress from 'material-ui/CircularProgress';
 
 const STYLES = {
@@ -15,6 +15,11 @@ const STYLES = {
 };
 
 export default class ProgressIndicator extends PureComponent {
+
+  static propTypes = {
+    show: PropTypes.bool.isRequired,
+  }
+
   render() {
     if (!this.props.show) {
       return null;
@@ -25,4 +30,5 @@ export default class ProgressIndicator extends PureComponent {
       </div>
     );
   }
+
 }

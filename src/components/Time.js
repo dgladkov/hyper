@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PropTypes, PureComponent } from 'react';
 
 function secondsToTimestamp(secondsTotal) {
   let minutes = Math.floor(secondsTotal / 60);
@@ -8,11 +8,20 @@ function secondsToTimestamp(secondsTotal) {
 }
 
 export default class Time extends PureComponent {
+
+  static propTypes = {
+    currentTime: PropTypes.number.isRequired,
+    duration: PropTypes.number.isRequired,
+  }
+
   render() {
     return (
       <div>
-        {secondsToTimestamp(this.props.currentTime)} / {secondsToTimestamp(this.props.duration)}
+        {secondsToTimestamp(this.props.currentTime)}
+        /
+        {secondsToTimestamp(this.props.duration)}
       </div>
     );
   }
+
 }

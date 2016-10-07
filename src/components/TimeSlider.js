@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PropTypes, PureComponent } from 'react';
 import Slider from 'material-ui/Slider';
 
 const STYLES = {
@@ -9,12 +9,21 @@ const STYLES = {
 };
 
 export default class TimeSlider extends PureComponent {
+
+  static propTypes = {
+    currentTime: PropTypes.number.isRequired,
+    duration: PropTypes.number.isRequired,
+    playing: PropTypes.bool.isRequired,
+    onChange: PropTypes.func.isRequired,
+    onDragStart: PropTypes.func.isRequired,
+    onDragStop: PropTypes.func.isRequired,
+  }
+
   render() {
-    const currentPercent = this.props.currentTime / this.props.duration;
     return (
       <Slider
         step={0.01}
-        value={currentPercent}
+        value={this.props.currentTime / this.props.duration}
         name="progress"
         disabled={!this.props.playing}
         style={STYLES.main}
@@ -24,4 +33,5 @@ export default class TimeSlider extends PureComponent {
       />
     );
   }
+
 }

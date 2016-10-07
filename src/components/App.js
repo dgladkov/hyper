@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PropTypes, PureComponent } from 'react';
 
 import AppBar from 'material-ui/AppBar';
 import FlatButton from 'material-ui/FlatButton';
@@ -30,20 +30,13 @@ function yqlQuery(url) {
 }
 
 export default class App extends PureComponent {
-  state = {
-    tracks: [],
-    videos: [],
-    artistName: '',
-    activeIndex: null,
-    playing: false,
-    currentTime: 0,
-    duration: 0,
-    loading: false,
-    dragging: false,
-    draggingValue: null,
+
+  static propTypes = {
+    player: PropTypes.object.isRequired,
   }
-  constructor() {
-    super();
+
+  constructor(props) {
+    super(props);
     this.handleTextInput = this.handleTextInput.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleArtistSearch = this.handleArtistSearch.bind(this);
@@ -56,6 +49,20 @@ export default class App extends PureComponent {
     this.handleTimeSeek = this.handleTimeSeek.bind(this);
     this.seekTo = this.seekTo.bind(this);
   }
+
+  state = {
+    tracks: [],
+    videos: [],
+    artistName: '',
+    activeIndex: null,
+    playing: false,
+    currentTime: 0,
+    duration: 0,
+    loading: false,
+    dragging: false,
+    draggingValue: null,
+  }
+
   componentDidMount() {
     this.props.player.addEventListener('onStateChange', this.playerStateChange);
     setInterval(() => {
@@ -64,15 +71,24 @@ export default class App extends PureComponent {
       }
     }, 200);
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    // load video every time active index changes
+    if (this.state.activeIndex !== null && prevState.activeIndex !== this.state.activeIndex) {
+      let activeVideo = this.state.videos[this.state.activeIndex];
+      this.props.player.loadVideoById(activeVideo);
+    }
+  }
+
   updateCurrentTime() {
     this.setState({
       currentTime: Math.floor(this.props.player.getCurrentTime()) || 0,
-      duration: Math.floor(this.props.player.getDuration()) || 0
+      duration: Math.floor(this.props.player.getDuration()) || 0,
     });
   }
   handleArtistSearch() {
     this.setState({
-      loading: true
+      loading: true,
     });
     fetch(`${LASTFM_API_BASEURL}?method=artist.gettoptracks&artist=${this.state.artistName}&api_key=${LASTFM_API_KEY}&format=json`)
       .then((response) => response.json())
@@ -93,7 +109,7 @@ export default class App extends PureComponent {
   }
   handleChange(e) {
     this.setState({
-      artistName: e.target.value
+      artistName: e.target.value,
     });
   }
   handleTextInput(e) {
@@ -109,7 +125,7 @@ export default class App extends PureComponent {
       return;
     }
     this.setState({
-      loading: true
+      loading: true,
     });
     fetch(yqlQuery(this.state.tracks[index].url))
       .then((response) => response.json())
@@ -132,13 +148,7 @@ export default class App extends PureComponent {
         });
       });
   }
-  componentDidUpdate(prevProps, prevState) {
-    // load video every time active index changes
-    if (this.state.activeIndex !== null && prevState.activeIndex !== this.state.activeIndex) {
-      let activeVideo = this.state.videos[this.state.activeIndex];
-      this.props.player.loadVideoById(activeVideo);
-    }
-  }
+
   pausePlayToggle() {
     if (this.state.playing === true) {
       this.props.player.pauseVideo();
@@ -207,7 +217,7 @@ export default class App extends PureComponent {
               <Controls
                 onPlayPauseHandler={this.pausePlayToggle}
                 playing={this.state.playing}
-                tracks={this.state.tracks}
+                lastIndex={this.state.tracks.length - 1}
                 activeIndex={this.state.activeIndex}
                 handleVideoSelect={this.handleVideoSelect}
               />

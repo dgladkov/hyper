@@ -1,13 +1,17 @@
-import React, { PureComponent } from 'react';
+import React, { PropTypes, PureComponent } from 'react';
 import IconButton from 'material-ui/IconButton';
 
 export default class Controls extends PureComponent {
+
   static propTypes = {
-    disabled: React.PropTypes.bool,
-    handleVideoSelect: React.PropTypes.func,
-    onPlayPauseHandler: React.PropTypes.func,
-    playing: React.PropTypes.bool,
+    activeIndex: PropTypes.number.isRequired,
+    lastIndex: PropTypes.number.isRequired,
+    disabled: PropTypes.bool.isRequired,
+    handleVideoSelect: PropTypes.func.isRequired,
+    onPlayPauseHandler: PropTypes.func.isRequired,
+    playing: PropTypes.bool.isRequired,
   }
+
   render() {
     return (
       <div>
@@ -28,7 +32,7 @@ export default class Controls extends PureComponent {
         <IconButton
           onClick={() => this.props.handleVideoSelect(this.props.activeIndex + 1)}
           iconClassName="material-icons"
-          disabled={this.props.activeIndex === null || this.props.activeIndex === this.props.tracks.length - 1}
+          disabled={this.props.activeIndex === null || this.props.activeIndex === this.props.lastIndex}
         >
           fast_forward
         </IconButton>
