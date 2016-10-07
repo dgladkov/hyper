@@ -79,7 +79,7 @@ export default class App extends PureComponent {
     }
   }
 
-  componentDidUnmount() {
+  componentWillUnmount() {
     this._player.destroy();
   }
 
