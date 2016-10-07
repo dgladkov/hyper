@@ -1,4 +1,4 @@
-import React, { PropTypes, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 
 import AppBar from 'material-ui/AppBar';
 import FlatButton from 'material-ui/FlatButton';
@@ -11,7 +11,7 @@ import Controls from './components/Controls';
 import Playlist from './components/Playlist';
 import ProgressIndicator from './components/ProgressIndicator';
 import Time from './components/Time';
-import TimeSlider from './components/TimeSlider';
+import Sliders from './components/Sliders';
 
 const LASTFM_API_KEY = '70bc1c39ae330d9cd698b7cc221febb6'; // YOLO
 const LASTFM_API_BASEURL = 'http://ws.audioscrobbler.com/2.0/';
@@ -43,7 +43,7 @@ export default class App extends PureComponent {
     this.handleTimeDragStart = this.handleTimeDragStart.bind(this);
     this.handleTimeDragStop = this.handleTimeDragStop.bind(this);
     this.handleTimeSeek = this.handleTimeSeek.bind(this);
-    this.seekTo = this.seekTo.bind(this);
+    this.handleVolumeChange = this.handleVolumeChange.bind(this);
   }
 
   state = {
@@ -57,6 +57,7 @@ export default class App extends PureComponent {
     loading: false,
     dragging: false,
     draggingValue: null,
+    currentVolume: 100,
   }
 
   componentDidMount() {
@@ -89,6 +90,7 @@ export default class App extends PureComponent {
       duration: Math.floor(this._player.getDuration()) || 0,
     });
   }
+
   handleArtistSearch() {
     this.setState({
       loading: true,
@@ -163,6 +165,11 @@ export default class App extends PureComponent {
     });
   }
   playerStateChange(event) {
+    if (event.data === -1) {
+      this.setState({
+        currentVolume: this._player.getVolume(),
+      });
+    }
     if (event.data === window.YT.PlayerState.ENDED) {
       let nextIndex = null;
       if (this.state.activeIndex < this.state.tracks.length - 1) {
@@ -170,13 +177,6 @@ export default class App extends PureComponent {
       }
       this.handleVideoSelect(nextIndex);
     }
-  }
-  seekTo(value) {
-    let seekToTime = Math.floor(this.state.duration * value);
-    this._player.seekTo(seekToTime);
-    this.setState({
-      currentTime: seekToTime,
-    });
   }
   handleTimeSeek(event, value) {
     this.setState({
@@ -189,10 +189,18 @@ export default class App extends PureComponent {
     });
   }
   handleTimeDragStop() {
+    let seekToTime = Math.floor(this.state.duration * this.state.draggingValue);
+    this._player.seekTo(seekToTime);
     this.setState({
+      currentTime: seekToTime,
       dragging: false,
     });
-    this.seekTo(this.state.draggingValue);
+  }
+  handleVolumeChange(event, value) {
+    this.setState({
+      currentVolume: value,
+    });
+    this._player.setVolume(value);
   }
   render() {
     return (
@@ -207,23 +215,27 @@ export default class App extends PureComponent {
               width: 'auto',
             }}
             title={
-              <TimeSlider
+              <Sliders
                 currentTime={this.state.currentTime}
+                currentVolume={this.state.currentVolume}
                 duration={this.state.duration}
                 playing={this.state.playing}
-                onChange={this.handleTimeSeek}
-                onDragStart={this.handleTimeDragStart}
-                onDragStop={this.handleTimeDragStop}
+                onTimeChange={this.handleTimeSeek}
+                onTimeDragStart={this.handleTimeDragStart}
+                onTimeDragStop={this.handleTimeDragStop}
+                onVolumeChange={this.handleVolumeChange}
               />
             }
             iconElementLeft={
-              <Controls
-                onPlayPauseHandler={this.pausePlayToggle}
-                playing={this.state.playing}
-                lastIndex={this.state.tracks.length - 1}
-                activeIndex={this.state.activeIndex}
-                handleVideoSelect={this.handleVideoSelect}
-              />
+              <div style={{display: 'flex', flexDirection: 'row'}}>
+                <Controls
+                  onPlayPauseHandler={this.pausePlayToggle}
+                  playing={this.state.playing}
+                  lastIndex={this.state.tracks.length - 1}
+                  activeIndex={this.state.activeIndex}
+                  handleVideoSelect={this.handleVideoSelect}
+                />
+              </div>
             }
             iconElementRight={
               <Time
