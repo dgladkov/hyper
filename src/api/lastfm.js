@@ -1,5 +1,5 @@
 const LASTFM_API_KEY = '70bc1c39ae330d9cd698b7cc221febb6';
-const BASE_URL = `http://ws.audioscrobbler.com/2.0/?api_key=${LASTFM_API_KEY}&format=json`;
+const BASE_URL = `https://ws.audioscrobbler.com/2.0/?api_key=${LASTFM_API_KEY}&format=json`;
 
 function api(data) {
   const queryString = Object.keys(data).map((value) => (
