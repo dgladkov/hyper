@@ -3,7 +3,7 @@ import CircularProgress from 'material-ui/CircularProgress';
 
 const STYLES = {
   main: {
-    position: 'absolute',
+    position: 'fixed',
     top: '50%',
     left: '50%',
     width: 140,
