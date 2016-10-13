@@ -66,6 +66,8 @@ export default class App extends PureComponent {
     draggingValue: null,
     volume: 100,
     searchType: 'artist',
+    page: 1,
+    lastPage: false,
   }
 
   componentDidMount() {
@@ -77,6 +79,11 @@ export default class App extends PureComponent {
     window.onYouTubeIframeAPIReady = () => {
       this._player = new window.YT.Player('hidden');
       this._player.addEventListener('onStateChange', this.playerStateChange);
+    };
+    window.onscroll = () => {
+      if (((window.innerHeight + window.scrollY) >= document.body.offsetHeight) && !this.state.loading) {
+        this.handleScrollToBottom();
+      }
     };
   }
 
@@ -108,9 +115,10 @@ export default class App extends PureComponent {
       .then((tracks) => {
         this.setState({
           tracks: tracks,
-          videos: [],
           activeIndex: null,
           loading: false,
+          page: 1,
+          lastPage: false,
         });
       })
       .catch((ex) => {
@@ -120,11 +128,44 @@ export default class App extends PureComponent {
         });
       });
   }
+
+  handleScrollToBottom() {
+    if (this.state.tracks && this.state.lastPage === true) {
+      return false;
+    }
+    this.setState({
+      loading: true,
+    });
+    const apiCall = searchTypeToApiCall[this.state.searchType];
+    apiCall(this.state.searchQuery, this.state.page + 1)
+      .then((tracks) => {
+        if (tracks.length > 0) {
+          this.setState({
+            tracks: [...this.state.tracks, ...tracks],
+            loading: false,
+            page: this.state.page + 1,
+          });
+        } else {
+          this.setState({
+            loading: false,
+            lastPage: true,
+          });
+        }
+      })
+      .catch((ex) => {
+        console.error(ex);
+        this.setState({
+          loading: false,
+        });
+      });
+  }
+
   handleChange(e) {
     this.setState({
       searchQuery: e.target.value,
     });
   }
+
   handleTextInput(e) {
     if (e.keyCode === 13) {
       this.handleSearch();
