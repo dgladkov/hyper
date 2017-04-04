@@ -2,18 +2,18 @@ import React, { PureComponent } from 'react';
 
 import AppBar from 'material-ui/AppBar';
 import FlatButton from 'material-ui/FlatButton';
-import TextField from 'material-ui/TextField';
-import Paper from 'material-ui/Paper';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import Paper from 'material-ui/Paper';
+import SelectField from 'material-ui/SelectField';
+import TextField from 'material-ui/TextField';
 
 import Controls from './components/Controls';
 import Playlist from './components/Playlist';
 import ProgressIndicator from './components/ProgressIndicator';
-import Time from './components/Time';
 import Sliders from './components/Sliders';
+import Time from './components/Time';
 
 import lastfm from './api/lastfm';
 
@@ -25,7 +25,7 @@ const muiTheme = getMuiTheme({
 });
 
 function yqlQuery(url) {
-  let resultUrl = url.replace('https://', 'http://');
+  let resultUrl = url.replace('https://', 'http://'); // last.fm bug workaround
   let query = `select data-youtube-id from html where url="${resultUrl}" and compat="html5" and xpath='//a[@data-youtube-id]' limit 1`;
   return `https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(query)}&format=json&diagnostics=false`;
 }
@@ -269,12 +269,7 @@ export default class App extends PureComponent {
         <div>
           <ProgressIndicator show={this.state.loading} />
           <AppBar
-            style={{
-              position: 'fixed',
-              right: 15,
-              left: 15,
-              width: 'auto',
-            }}
+            style={STYLES.appBar}
             title={
               <Sliders
                 currentTime={this.state.currentTime}
@@ -288,7 +283,7 @@ export default class App extends PureComponent {
               />
             }
             iconElementLeft={
-              <div style={{display: 'flex', flexDirection: 'row'}}>
+              <div style={STYLES.controlsHolder}>
                 <Controls
                   onPlayPauseHandler={this.pausePlayToggle}
                   playing={this.state.playing}
@@ -304,13 +299,10 @@ export default class App extends PureComponent {
                 duration={this.state.duration}
               />
             }
-            iconStyleRight={{
-              textAlign: 'center',
-              padding: 14,
-            }}
+            iconStyleRight={STYLES.rightIcon}
           />
-          <Paper style={{top: 80, marginBottom: 15, position: 'relative'}}>
-            <div style={{paddingLeft: 16, paddingTop: 10, display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+          <Paper style={STYLES.contentWrapper}>
+            <div style={STYLES.content}>
               <TextField
                 hintText="Your search query"
                 value={this.state.searchQuery}
@@ -335,3 +327,32 @@ export default class App extends PureComponent {
     );
   }
 }
+
+const STYLES = {
+  appBar: {
+    position: 'fixed',
+    left: 15,
+    right: 15,
+    width: 'auto',
+  },
+  controlsHolder: {
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  rightIcon: {
+    textAlign: 'center',
+    padding: 14,
+  },
+  contentWrapper: {
+    position: 'relative'
+    top: 80,
+    marginBottom: 15,
+  },
+  content: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 16,
+    paddingTop: 10,
+  }
+};
